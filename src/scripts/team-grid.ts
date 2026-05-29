@@ -25,6 +25,8 @@ type I18nPayload = {
   maxCitiesTpl: string;
   summaryOverlapTpl: string;
   summaryNoOverlapTpl: string;
+  tooltipTpl: string;
+  tooltipAndr: string;
 };
 
 function tpl(template: string, vars: Record<string, string | number>): string {
@@ -182,7 +184,7 @@ function renderHorizontal(ref: DateTime, utcStartOfDay: DateTime, baseId: string
     for (let utcH = 0; utcH < SLOT_COUNT; utcH++) {
       const local = utcStartOfDay.plus({ hours: utcH }).setZone(city.timezone);
       const overlapsOther = inRange(local.hour) && inRangeCount[utcH] >= 2;
-      html += `<div class="flex items-center justify-center border-l border-slate-200 dark:border-slate-800/40 py-3 text-[11px] font-mono tabular-nums ${cellClass(local.hour)} ${overlapsOther ? RING : ''}">${String(local.hour).padStart(2, '0')}</div>`;
+      html += `<div data-utc="${utcH}" data-city="${city.id}" class="grid-cell flex items-center justify-center border-l border-slate-200 dark:border-slate-800/40 py-3 text-[11px] font-mono tabular-nums transition-colors ${cellClass(local.hour)} ${overlapsOther ? RING : ''}">${String(local.hour).padStart(2, '0')}</div>`;
     }
 
     html += `<button data-remove="${city.id}" class="flex items-center justify-center text-slate-400 transition hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400" title="✕">✕</button>`;
@@ -194,11 +196,10 @@ function renderHorizontal(ref: DateTime, utcStartOfDay: DateTime, baseId: string
 // Mobile: hours run down the rows, cities across the columns.
 function renderVertical(ref: DateTime, utcStartOfDay: DateTime, baseId: string, inRangeCount: number[]): string {
   const base = citiesById.get(baseId)!;
-  const cols = `style="grid-template-columns:44px repeat(${state.cities.length},minmax(0,1fr))"`;
+  const cols = `style="grid-template-columns:repeat(${state.cities.length},minmax(0,1fr))"`;
 
   // Header row: city names + remove buttons.
   let html = `<div class="grid border-b border-slate-200 dark:border-slate-800" ${cols}>`;
-  html += `<div></div>`;
   for (const cityId of state.cities) {
     const city = citiesById.get(cityId);
     if (!city) continue;
@@ -215,14 +216,13 @@ function renderVertical(ref: DateTime, utcStartOfDay: DateTime, baseId: string, 
   for (let i = 0; i < SLOT_COUNT; i++) {
     const slot = baseStart.plus({ hours: i });
     html += `<div class="grid border-b border-slate-100 last:border-b-0 dark:border-slate-800/40" ${cols}>`;
-    html += `<div class="flex items-center justify-center py-2 text-[11px] font-mono tabular-nums text-slate-400 dark:text-slate-500">${slot.toFormat('HH')}</div>`;
     for (const cityId of state.cities) {
       const city = citiesById.get(cityId);
       if (!city) continue;
       const local = slot.setZone(city.timezone);
       const utcH = slot.toUTC().hour;
       const overlapsOther = inRange(local.hour) && inRangeCount[utcH] >= 2;
-      html += `<div class="flex items-center justify-center border-l border-slate-200 py-2 text-[11px] font-mono tabular-nums dark:border-slate-800/40 ${cellClass(local.hour)} ${overlapsOther ? RING : ''}">${local.toFormat('HH')}</div>`;
+      html += `<div data-utc="${utcH}" data-city="${city.id}" class="grid-cell flex items-center justify-center border-l border-slate-200 py-2 text-[11px] font-mono tabular-nums transition-colors dark:border-slate-800/40 ${cellClass(local.hour)} ${overlapsOther ? RING : ''}">${local.toFormat('HH')}</div>`;
     }
     html += `</div>`;
   }
@@ -305,6 +305,8 @@ function formatRanges(utcHours: number[], baseTz: string, utcStartOfDay: DateTim
   return ranges.join(', ');
 }
 
+const HIGHLIGHT = ['bg-emerald-200/70', 'dark:bg-emerald-400/25', 'ring-1', 'ring-inset', 'ring-emerald-400/40'];
+
 function attachGridHandlers() {
   document.querySelectorAll('[data-remove]').forEach((el) => {
     el.addEventListener('click', () => {
@@ -314,6 +316,93 @@ function attachGridHandlers() {
       render();
       syncControls();
     });
+  });
+
+  attachColumnHighlight();
+}
+
+function localHour(cityId: string, utcH: number): number {
+  const city = citiesById.get(cityId);
+  if (!city) return 0;
+  return DateTime.utc().startOf('day').plus({ hours: utcH }).setZone(city.timezone).hour;
+}
+
+function tooltipText(cityId: string, utcH: number): string {
+  const hh = (h: number) => String(h).padStart(2, '0');
+  const at = i18n.locale === 'es' ? 'en' : 'in';
+  const others = state.cities
+    .filter((id) => id !== cityId)
+    .map((id) => `${hh(localHour(id, utcH))} ${at} ${citiesById.get(id)?.name ?? ''}`);
+  if (others.length === 0) return '';
+  const rest =
+    others.length === 1
+      ? others[0]
+      : others.slice(0, -1).join(', ') + i18n.tooltipAndr + others[others.length - 1];
+  return tpl(i18n.tooltipTpl, {
+    h: hh(localHour(cityId, utcH)),
+    city: citiesById.get(cityId)?.name ?? '',
+    rest,
+  });
+}
+
+function attachColumnHighlight() {
+  const content = document.getElementById('grid-content');
+  const tip = document.getElementById('hour-tooltip');
+  if (!content) return;
+
+  let pinned: string | null = null;
+
+  const setHighlight = (utc: string | null) => {
+    content.querySelectorAll<HTMLElement>('.grid-cell').forEach((cell) => {
+      const on = utc !== null && cell.dataset.utc === utc;
+      cell.classList[on ? 'add' : 'remove'](...HIGHLIGHT);
+    });
+  };
+
+  const showTip = (cell: HTMLElement | null) => {
+    if (!tip) return;
+    if (!cell || cell.dataset.utc === undefined || cell.dataset.city === undefined) {
+      tip.classList.add('hidden');
+      return;
+    }
+    const text = tooltipText(cell.dataset.city, Number(cell.dataset.utc));
+    if (!text) {
+      tip.classList.add('hidden');
+      return;
+    }
+    tip.textContent = text;
+    tip.classList.remove('hidden');
+    const r = cell.getBoundingClientRect();
+    const margin = 8;
+    const half = tip.offsetWidth / 2;
+    const center = Math.min(
+      window.innerWidth - margin - half,
+      Math.max(margin + half, r.left + r.width / 2),
+    );
+    tip.style.left = `${center}px`;
+    tip.style.top = `${r.top - 6}px`;
+  };
+
+  const apply = (cell: HTMLElement | null) => {
+    const utc = cell?.dataset.utc ?? pinned;
+    setHighlight(utc ?? null);
+    showTip(cell ?? content.querySelector<HTMLElement>(`.grid-cell[data-utc="${pinned}"]`));
+  };
+
+  content.addEventListener('mouseover', (e) => {
+    apply((e.target as HTMLElement).closest<HTMLElement>('.grid-cell'));
+  });
+  content.addEventListener('mouseleave', () => {
+    setHighlight(pinned);
+    if (pinned === null && tip) tip.classList.add('hidden');
+    else apply(null);
+  });
+  content.addEventListener('click', (e) => {
+    const cell = (e.target as HTMLElement).closest<HTMLElement>('.grid-cell');
+    if (!cell) return;
+    pinned = pinned === cell.dataset.utc ? null : cell.dataset.utc ?? null;
+    setHighlight(pinned);
+    showTip(pinned ? cell : null);
   });
 }
 
