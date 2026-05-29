@@ -56,72 +56,19 @@ const i18nPayload = {
   canonicalPath={locale === 'es' ? '/' : '/en'}
 >
   <section class="mx-auto max-w-7xl px-6 pt-8 pb-6 sm:pt-10">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div class="max-w-3xl">
-        <h1 id="team-title" class="text-2xl font-bold tracking-tight sm:text-4xl">
-          {dict.home.h1}
-        </h1>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
-          {dict.home.subtitle}
-        </p>
-      </div>
-      <div class="flex w-full gap-2 sm:w-auto">
-        <button
-          id="save-btn"
-          class="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300"
-        >
-          {dict.home.save}
-        </button>
-        <button
-          id="share-btn"
-          class="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300"
-        >
-          {dict.home.share}
-        </button>
-      </div>
+    <div class="max-w-3xl">
+      <h1 id="team-title" class="text-2xl font-bold tracking-tight sm:text-4xl">
+        {dict.home.h1}
+      </h1>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+        {dict.home.subtitle}
+      </p>
     </div>
   </section>
 
   <section class="mx-auto max-w-7xl px-6 pb-6">
-    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
-      <div class="flex flex-wrap items-end gap-4">
-        <div class="relative min-w-[200px] flex-1">
-          <label for="base-input" class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">
-            {dict.home.baseLabel}
-          </label>
-          <input
-            id="base-input"
-            type="text"
-            placeholder={dict.home.basePlaceholder}
-            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-emerald-400"
-            autocomplete="off"
-          />
-          <ul
-            id="base-suggestions"
-            class="absolute z-10 mt-1 hidden max-h-56 w-full overflow-y-auto rounded-lg border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-950"
-          ></ul>
-        </div>
-        <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">
-            {dict.home.hoursLabel}
-          </label>
-          <div class="flex items-center gap-2">
-            <select
-              id="start-select"
-              aria-label={dict.home.hoursStart}
-              class="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-400"
-            ></select>
-            <span class="text-sm text-slate-500">{dict.home.hoursTo}</span>
-            <select
-              id="end-select"
-              aria-label={dict.home.hoursEnd}
-              class="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-400"
-            ></select>
-          </div>
-        </div>
-      </div>
-
-      <div class="relative mt-4">
+    <div class="flex flex-wrap items-end justify-center gap-3">
+      <div class="relative min-w-[200px] max-w-md flex-1 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/40">
         <label for="city-input" class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">
           {dict.home.addLabel}
         </label>
@@ -134,23 +81,58 @@ const i18nPayload = {
         />
         <ul
           id="city-suggestions"
-          class="absolute z-10 mt-1 hidden max-h-56 w-full overflow-y-auto rounded-lg border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-950"
+          class="absolute left-3 right-3 z-10 mt-1 hidden max-h-56 overflow-y-auto rounded-lg border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-950"
         ></ul>
       </div>
 
-      <div class="mt-3 flex justify-end">
-        <button
-          id="reset-btn"
-          class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 transition hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-slate-200"
-        >
-          {dict.home.clear}
-        </button>
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/40">
+        <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">
+          {dict.home.hoursLabel}
+        </label>
+        <div class="flex items-center gap-1.5">
+          <select
+            id="start-select"
+            aria-label={dict.home.hoursStart}
+            class="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-400"
+          ></select>
+          <span class="text-sm text-slate-500">{dict.home.hoursTo}</span>
+          <select
+            id="end-select"
+            aria-label={dict.home.hoursEnd}
+            class="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-400"
+          ></select>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="mx-auto max-w-7xl px-6 pb-12">
     <div id="team-grid" class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/30">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+        <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+          {dict.home.controlsTitle}
+        </span>
+        <div class="flex gap-2">
+          <button
+            id="save-btn"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300"
+          >
+            {dict.home.save}
+          </button>
+          <button
+            id="share-btn"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300"
+          >
+            {dict.home.share}
+          </button>
+          <button
+            id="reset-btn"
+            class="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20"
+          >
+            {dict.home.clear}
+          </button>
+        </div>
+      </div>
       <div id="grid-empty" class="hidden p-12 text-center text-slate-500">
         {dict.home.empty}
       </div>

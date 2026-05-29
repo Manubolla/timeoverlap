@@ -406,14 +406,6 @@ function attachColumnHighlight() {
   });
 }
 
-// Reflect the current base city's name into the base input (autofill).
-function syncBaseInput() {
-  const input = document.getElementById('base-input') as HTMLInputElement | null;
-  if (!input || input === document.activeElement) return;
-  const base = state.cities[0] ? citiesById.get(state.cities[0]) : undefined;
-  input.value = base ? base.name : '';
-}
-
 function syncHourRange() {
   const startSel = document.getElementById('start-select') as HTMLSelectElement | null;
   const endSel = document.getElementById('end-select') as HTMLSelectElement | null;
@@ -422,18 +414,15 @@ function syncHourRange() {
 }
 
 function syncControls() {
-  syncBaseInput();
   syncHourRange();
 }
 
-function setupPicker(inputId: string, listId: string, mode: 'base' | 'add') {
+function setupPicker(inputId: string, listId: string) {
   const input = document.getElementById(inputId) as HTMLInputElement;
   const list = document.getElementById(listId) as HTMLUListElement;
 
   function pick(id: string) {
-    if (mode === 'base') {
-      state.cities = [id, ...state.cities.filter((c) => c !== id)];
-    } else if (!state.cities.includes(id)) {
+    if (!state.cities.includes(id)) {
       if (state.cities.length >= MAX_CITIES) {
         showToast(tpl(i18n.maxCitiesTpl, { n: MAX_CITIES }));
         return;
@@ -452,7 +441,7 @@ function setupPicker(inputId: string, listId: string, mode: 'base' | 'add') {
     }
     const nq = normalize(q);
     const results = cities
-      .filter((c) => mode === 'base' || !state.cities.includes(c.id))
+      .filter((c) => !state.cities.includes(c.id))
       .map((c) => {
         const n = normalize(c.name);
         const co = normalize(c.country);
@@ -485,7 +474,7 @@ function setupPicker(inputId: string, listId: string, mode: 'base' | 'add') {
       el.addEventListener('mousedown', (e) => {
         e.preventDefault();
         pick((el as HTMLElement).dataset.add!);
-        if (mode === 'add') input.value = '';
+        input.value = '';
         list.classList.add('hidden');
         input.blur();
       });
@@ -493,14 +482,8 @@ function setupPicker(inputId: string, listId: string, mode: 'base' | 'add') {
   }
 
   input.addEventListener('input', (e) => renderSuggestions((e.target as HTMLInputElement).value));
-  input.addEventListener('focus', () => {
-    if (mode === 'base') input.select();
-    renderSuggestions(input.value);
-  });
-  input.addEventListener('blur', () => setTimeout(() => {
-    list.classList.add('hidden');
-    if (mode === 'base') syncBaseInput();
-  }, 150));
+  input.addEventListener('focus', () => renderSuggestions(input.value));
+  input.addEventListener('blur', () => setTimeout(() => list.classList.add('hidden'), 150));
 }
 
 function setupHourRange() {
@@ -531,8 +514,7 @@ function setupHourRange() {
 }
 
 function setupCityPicker() {
-  setupPicker('base-input', 'base-suggestions', 'base');
-  setupPicker('city-input', 'city-suggestions', 'add');
+  setupPicker('city-input', 'city-suggestions');
   setupHourRange();
   syncControls();
 
