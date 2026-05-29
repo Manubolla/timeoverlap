@@ -103,17 +103,27 @@ const enHref = `${siteUrl}${locale === 'en' ? path : altPath}`;
     </main>
 
     <footer class="mt-24 border-t border-slate-200 dark:border-slate-800/60">
-      <div class="mx-auto max-w-6xl px-6 py-10 text-sm text-slate-500 dark:text-slate-400">
-        <p>{dict.footer.tagline}</p>
-        <p class="mt-1">
-          {dict.footer.builtBy}{' '}
-          <a
-            href={dict.footer.authorUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="font-medium text-slate-700 underline-offset-2 hover:underline dark:text-slate-300"
-          >{dict.footer.author}</a>
-        </p>
+      <div class="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 text-sm text-slate-500 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p>{dict.footer.tagline}</p>
+          <p class="mt-1">
+            {dict.footer.builtBy}{' '}
+            <a
+              href={dict.footer.authorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-slate-700 underline-offset-2 hover:underline dark:text-slate-300"
+            >{dict.footer.author}</a>
+          </p>
+        </div>
+
+        <a href={dict.support.cafecitoUrl} rel="noopener" target="_blank" class="shrink-0">
+          <img
+            srcset="https://cdn.cafecito.app/imgs/buttons/button_1.png 1x, https://cdn.cafecito.app/imgs/buttons/button_1_2x.png 2x, https://cdn.cafecito.app/imgs/buttons/button_1_3.75x.png 3.75x"
+            src="https://cdn.cafecito.app/imgs/buttons/button_1.png"
+            alt={dict.support.cafecitoLabel}
+          />
+        </a>
       </div>
     </footer>
 

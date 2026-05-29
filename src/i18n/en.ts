@@ -27,6 +27,17 @@ export const en: Widen<typeof es> = {
     author: "Manuel Bolla Agrelo",
     authorUrl: "https://github.com/manubolla",
   },
+  support: {
+    cafecitoLabel: "Buy me a coffee at cafecito.app",
+    cafecitoUrl: "https://cafecito.app/manubolla",
+    assist365Eyebrow: "Before your next trip",
+    assist365Title: "Cover your trip with Assist 365",
+    assist365Subtitle:
+      "Travel assistance in 100+ countries. Get a quote in minutes.",
+    assist365Cta: "See coverage",
+    assist365Url: "https://c4ub.short.gy/timeoverlap",
+    assist365Disclosure: "Affiliate link",
+  },
   home: {
     eyebrow: "",
     h1: "Compare time across cities",

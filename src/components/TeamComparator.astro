@@ -152,6 +152,33 @@ const i18nPayload = {
     <div id="nomad-hubs" class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6"></div>
   </section>
 
+  <section class="mx-auto max-w-7xl px-6 pb-20">
+    <div class="flex flex-col items-start gap-4 rounded-xl border border-slate-200 bg-gradient-to-br from-sky-50 to-emerald-50 p-6 dark:border-slate-800 dark:from-sky-500/5 dark:to-emerald-500/5 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="text-xs font-medium uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+          {dict.support.assist365Eyebrow}
+        </p>
+        <h2 class="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
+          {dict.support.assist365Title}
+        </h2>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          {dict.support.assist365Subtitle}
+        </p>
+      </div>
+      <a
+        href={dict.support.assist365Url}
+        target="_blank"
+        rel="sponsored noopener noreferrer"
+        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-slate-950 transition hover:bg-emerald-400"
+      >
+        {dict.support.assist365Cta} →
+      </a>
+    </div>
+    <p class="mt-2 text-right text-[11px] text-slate-400 dark:text-slate-500">
+      {dict.support.assist365Disclosure}
+    </p>
+  </section>
+
   <!-- Save modal -->
   <div
     id="save-modal"
