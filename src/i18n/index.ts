@@ -22,8 +22,3 @@ export function localizePath(path: string, locale: Locale): string {
   if (locale === 'es') return clean;
   return clean === '/' ? '/en' : `/en${clean}`;
 }
-
-export function pairPath(fromSlug: string, toSlug: string, locale: Locale): string {
-  if (locale === 'en') return `/en/time/${fromSlug}-to-${toSlug}`;
-  return `/horario/${fromSlug}-a-${toSlug}`;
-}
