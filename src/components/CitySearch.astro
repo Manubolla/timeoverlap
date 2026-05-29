@@ -1,0 +1,125 @@
+---
+import { cities } from '../data/cities';
+
+interface Props {
+  id: string;
+  placeholder?: string;
+  defaultCityId?: string;
+}
+
+const { id, placeholder = 'Buscar ciudad...', defaultCityId } = Astro.props;
+const defaultCity = defaultCityId ? cities.find((c) => c.id === defaultCityId) : null;
+const citiesPayload = cities.map((c) => ({
+  id: c.id,
+  name: c.name,
+  country: c.country,
+  countryCode: c.countryCode,
+  pop: c.population,
+  nomadHub: c.nomadHub ?? false,
+}));
+---
+
+<div class="relative" data-city-search={id}>
+  <input
+    type="text"
+    role="combobox"
+    aria-expanded="false"
+    aria-autocomplete="list"
+    aria-controls={`${id}-listbox`}
+    autocomplete="off"
+    placeholder={placeholder}
+    value={defaultCity?.name ?? ''}
+    data-input
+    class="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none"
+  />
+  <input type="hidden" data-value value={defaultCity?.id ?? ''} />
+  <ul
+    id={`${id}-listbox`}
+    role="listbox"
+    data-listbox
+    class="absolute left-0 right-0 top-full z-20 mt-1 hidden max-h-72 overflow-y-auto rounded-lg border border-slate-700 bg-slate-900 shadow-xl"
+  ></ul>
+</div>
+
+<script is:inline define:vars={{ id, citiesPayload }}>
+  (function init() {
+    const root = document.querySelector(`[data-city-search="${id}"]`);
+    if (!root) return;
+    const input = root.querySelector('[data-input]');
+    const hidden = root.querySelector('[data-value]');
+    const listbox = root.querySelector('[data-listbox]');
+
+    function normalize(s) {
+      return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    }
+
+    function score(city, q) {
+      const name = normalize(city.name);
+      const country = normalize(city.country);
+      const code = normalize(city.countryCode);
+      if (name.startsWith(q)) return 100 + city.pop / 1e7;
+      if (name.includes(q)) return 50 + city.pop / 1e7;
+      if (country.startsWith(q)) return 30 + city.pop / 1e7;
+      if (code === q) return 80;
+      if (country.includes(q)) return 10;
+      return -1;
+    }
+
+    function render(results) {
+      listbox.innerHTML = '';
+      if (results.length === 0) {
+        listbox.classList.add('hidden');
+        return;
+      }
+      results.forEach((city, idx) => {
+        const li = document.createElement('li');
+        li.setAttribute('role', 'option');
+        li.dataset.id = city.id;
+        li.className =
+          'flex cursor-pointer items-center justify-between px-4 py-2 text-sm text-slate-200 hover:bg-slate-800';
+        li.innerHTML = `
+          <span class="flex items-center gap-2">
+            <span>${city.name}</span>
+            ${city.nomadHub ? '<span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-medium text-emerald-300">nómade</span>' : ''}
+          </span>
+          <span class="text-xs text-slate-500">${city.country}</span>
+        `;
+        li.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          select(city);
+        });
+        listbox.appendChild(li);
+      });
+      listbox.classList.remove('hidden');
+    }
+
+    function select(city) {
+      input.value = city.name;
+      hidden.value = city.id;
+      listbox.classList.add('hidden');
+      input.dispatchEvent(new CustomEvent('city:selected', { detail: city, bubbles: true }));
+    }
+
+    function search(q) {
+      if (!q || q.length < 1) return [];
+      const nq = normalize(q);
+      return citiesPayload
+        .map((c) => ({ c, s: score(c, nq) }))
+        .filter((x) => x.s > 0)
+        .sort((a, b) => b.s - a.s)
+        .slice(0, 8)
+        .map((x) => x.c);
+    }
+
+    input.addEventListener('input', (e) => {
+      hidden.value = '';
+      render(search(e.target.value));
+    });
+    input.addEventListener('focus', () => {
+      if (input.value) render(search(input.value));
+    });
+    input.addEventListener('blur', () => {
+      setTimeout(() => listbox.classList.add('hidden'), 120);
+    });
+  })();
+</script>

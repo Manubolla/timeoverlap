@@ -1,0 +1,181 @@
+---
+import Layout from '../layouts/Layout.astro';
+import OverlapGrid from './OverlapGrid.astro';
+import { findCity, countryName } from '../data/cities';
+import {
+  computeOverlap,
+  formatTimeDifference,
+  getOffsetLabel,
+  getTimeDifference,
+  DEFAULT_WORK_HOURS,
+} from '../lib/timezone';
+import { DateTime } from 'luxon';
+import { t, type Locale, pairPath } from '../i18n';
+
+interface Props {
+  fromSlug: string;
+  toSlug: string;
+  locale: Locale;
+}
+
+const { fromSlug, toSlug, locale } = Astro.props;
+const dict = t(locale);
+
+const fromCity = findCity(fromSlug);
+const toCity = findCity(toSlug);
+if (!fromCity || !toCity) return Astro.redirect(locale === 'es' ? '/' : '/en');
+
+const fromName = locale === 'en' ? fromCity.nameEn : fromCity.name;
+const toName = locale === 'en' ? toCity.nameEn : toCity.name;
+const fromCountry = countryName(fromCity, locale);
+const toCountry = countryName(toCity, locale);
+
+const reference = DateTime.utc();
+const overlap = computeOverlap(fromCity, toCity, undefined, reference);
+const diffH = getTimeDifference(fromCity.timezone, toCity.timezone, reference);
+const diffStr = formatTimeDifference(diffH, dict.diff);
+
+const title = dict.meta.pairTitle(fromName, toName);
+const description = dict.meta.pairDescription(fromName, fromCountry, toName, toCountry, diffStr);
+
+const overlapMsg = overlap.hasOverlap
+  ? dict.pair.overlapPositive(overlap.overlapHours)
+  : dict.pair.overlapNone;
+
+const canonicalPath = pairPath(
+  locale === 'en' ? fromCity.slugEn : fromCity.slug,
+  locale === 'en' ? toCity.slugEn : toCity.slug,
+  locale,
+);
+const altLocale: Locale = locale === 'es' ? 'en' : 'es';
+const alternatePath = pairPath(
+  altLocale === 'en' ? fromCity.slugEn : fromCity.slug,
+  altLocale === 'en' ? toCity.slugEn : toCity.slug,
+  altLocale,
+);
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  inLanguage: locale,
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: dict.pair.faqDiffQ(fromName, toName),
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: dict.pair.faqDiffA(fromName, toName, diffStr),
+      },
+    },
+    {
+      '@type': 'Question',
+      name: dict.pair.faqOverlapQ(fromName, toName),
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: dict.pair.faqOverlapA(overlap.overlapHours),
+      },
+    },
+  ],
+};
+
+const homePath = locale === 'es' ? '/' : '/en';
+
+const pairPayload = {
+  locale,
+  fromTz: fromCity.timezone,
+  toTz: toCity.timezone,
+  workStart: DEFAULT_WORK_HOURS.start,
+  workEnd: DEFAULT_WORK_HOURS.end,
+  diff: dict.diff,
+};
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  alternatePath={alternatePath}
+>
+  <section class="mx-auto max-w-6xl px-6 pt-12 pb-8">
+    <nav class="text-sm text-slate-500">
+      <a href={homePath} class="hover:text-slate-700 dark:hover:text-slate-300">{dict.pair.breadcrumbHome}</a>
+      <span class="mx-2">/</span>
+      <span class="text-slate-700 dark:text-slate-300">{fromName} → {toName}</span>
+    </nav>
+
+    <h1 class="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+      {fromName} ↔ {toName}
+    </h1>
+    <p class="mt-3 max-w-3xl text-lg text-slate-600 dark:text-slate-300">
+      <span set:html={dict.pair.intro(fromName, toName, `<span class="text-emerald-600 dark:text-emerald-400" data-live-diff>${diffStr}</span>`, overlapMsg)} />
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 pb-8">
+    <div class="grid gap-4 lg:grid-cols-2">
+      <OverlapGrid city={fromCity} otherCity={toCity} locale={locale} />
+      <OverlapGrid city={toCity} otherCity={fromCity} locale={locale} />
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 pb-12">
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900/40">
+        <div class="text-xs uppercase tracking-wider text-slate-500">{dict.pair.cardDiff}</div>
+        <div class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100" data-live-diff>{diffStr}</div>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900/40">
+        <div class="text-xs uppercase tracking-wider text-slate-500">{dict.pair.cardOverlap}</div>
+        <div class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          {overlap.overlapHours} {overlap.overlapHours === 1 ? dict.diff.hour : dict.diff.hours}
+        </div>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900/40">
+        <div class="text-xs uppercase tracking-wider text-slate-500">{dict.pair.cardZones}</div>
+        <div class="mt-1 text-sm text-slate-700 dark:text-slate-300">
+          <div>{fromCity.timezone} · <span data-live-offset={fromCity.timezone}>{getOffsetLabel(fromCity.timezone, reference)}</span></div>
+          <div>{toCity.timezone} · <span data-live-offset={toCity.timezone}>{getOffsetLabel(toCity.timezone, reference)}</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 pb-12">
+    <h2 class="mb-4 text-2xl font-bold">{dict.pair.bestMeeting}</h2>
+    <div class="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900/40">
+      {overlap.hasOverlap ? (
+        <p class="text-slate-700 dark:text-slate-300">
+          {dict.pair.bestMeetingYes(overlap.overlapHours, fromName, toName)}
+        </p>
+      ) : (
+        <div class="text-slate-700 dark:text-slate-300">
+          <p>{dict.pair.bestMeetingNo}</p>
+          <ul class="mt-3 list-disc space-y-1 pl-5 text-slate-600 dark:text-slate-400">
+            {dict.pair.bestMeetingOptions.map((opt) => <li>{opt}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 pb-16">
+    <a
+      href={`${homePath}?cities=${fromCity.id},${toCity.id}`}
+      class="flex items-center justify-between rounded-xl border border-emerald-400/40 bg-emerald-50 p-5 transition hover:border-emerald-500 dark:border-emerald-400/30 dark:bg-emerald-400/5 dark:hover:border-emerald-400/60"
+    >
+      <div>
+        <div class="text-sm font-medium text-emerald-700 dark:text-emerald-300">{dict.pair.ctaTeam}</div>
+        <div class="mt-1 text-slate-700 dark:text-slate-300">{dict.pair.ctaTeamSubtitle}</div>
+      </div>
+      <span class="text-emerald-600 dark:text-emerald-400">→</span>
+    </a>
+  </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+
+  <div id="pair-data" data-pair={JSON.stringify(pairPayload)} hidden></div>
+  <script>
+    import { initPairLive } from '../scripts/pair-live';
+    initPairLive();
+  </script>
+</Layout>

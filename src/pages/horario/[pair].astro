@@ -1,0 +1,22 @@
+---
+import PairPage from '../../components/PairPage.astro';
+import { cities } from '../../data/cities';
+
+export function getStaticPaths() {
+  const paths: { params: { pair: string }; props: { fromSlug: string; toSlug: string } }[] = [];
+  for (const from of cities) {
+    for (const to of cities) {
+      if (from.id === to.id) continue;
+      paths.push({
+        params: { pair: `${from.slug}-a-${to.slug}` },
+        props: { fromSlug: from.slug, toSlug: to.slug },
+      });
+    }
+  }
+  return paths;
+}
+
+const { fromSlug, toSlug } = Astro.props;
+---
+
+<PairPage fromSlug={fromSlug} toSlug={toSlug} locale="es" />

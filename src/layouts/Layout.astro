@@ -1,0 +1,124 @@
+---
+import '../styles/global.css';
+import { getLocaleFromPath, localizePath, t, type Locale } from '../i18n';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  alternatePath?: string;
+}
+
+const locale: Locale = getLocaleFromPath(Astro.url.pathname);
+const dict = t(locale);
+const { title, description, canonicalPath, alternatePath } = Astro.props;
+const siteUrl = 'https://timeoverlap.app';
+const path = canonicalPath ?? Astro.url.pathname;
+const canonical = `${siteUrl}${path}`;
+
+const altPath = alternatePath ?? (locale === 'es' ? localizePath(path, 'en') : localizePath(path, 'es'));
+const altLocale: Locale = locale === 'es' ? 'en' : 'es';
+const esHref = `${siteUrl}${locale === 'es' ? path : altPath}`;
+const enHref = `${siteUrl}${locale === 'en' ? path : altPath}`;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={esHref} />
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="x-default" href={esHref} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale === 'es' ? 'es_AR' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('timeoverlap:theme');
+          var dark;
+          if (stored === 'dark') dark = true;
+          else if (stored === 'light') dark = false;
+          else dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.toggle('dark', dark);
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-white text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <header class="border-b border-slate-200 dark:border-slate-800/60">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+        <a href={locale === 'es' ? '/' : '/en'} class="flex items-center gap-2 text-lg font-semibold tracking-tight">
+          <span class="inline-block size-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
+          TimeOverlap
+        </a>
+
+        <nav class="hidden gap-6 text-sm text-slate-500 dark:text-slate-400 sm:flex">
+          <a href={locale === 'es' ? '/' : '/en'} class="transition hover:text-slate-900 dark:hover:text-slate-100">
+            {dict.nav.comparator}
+          </a>
+          <a href={locale === 'es' ? '/mis-comparaciones' : '/en/saved'} class="transition hover:text-slate-900 dark:hover:text-slate-100">
+            {dict.nav.saved}
+          </a>
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <!-- Theme toggle: single button that flips between light and dark -->
+          <button
+            id="theme-toggle"
+            class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-base text-slate-700 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300"
+            aria-label={dict.theme.label}
+            title={dict.theme.label}
+          >
+            <span class="hidden dark:inline">☀</span>
+            <span class="dark:hidden">☾</span>
+          </button>
+
+          <!-- Lang toggle -->
+          <a
+            href={altPath}
+            class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300"
+            hreflang={altLocale}
+            aria-label={`${dict.lang.label}: ${altLocale === 'es' ? dict.lang.es : dict.lang.en}`}
+          >
+            {altLocale === 'es' ? 'ES' : 'EN'}
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="mt-24 border-t border-slate-200 dark:border-slate-800/60">
+      <div class="mx-auto max-w-6xl px-6 py-10 text-sm text-slate-500 dark:text-slate-400">
+        <p>{dict.footer.tagline}</p>
+        <p class="mt-1">
+          {dict.footer.builtBy}{' '}
+          <a
+            href={dict.footer.authorUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-medium text-slate-700 underline-offset-2 hover:underline dark:text-slate-300"
+          >{dict.footer.author}</a>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      import '../scripts/theme-toggle';
+    </script>
+  </body>
+</html>

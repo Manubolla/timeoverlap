@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { cities, countryName } from '../data/cities';
+import { t, type Locale } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+
+const citiesPayload = cities.map((c) => ({
+  id: c.id,
+  name: locale === 'en' ? c.nameEn : c.name,
+  country: countryName(c, locale),
+}));
+
+const i18nPayload = {
+  locale,
+  comparatorPath: locale === 'es' ? '/' : '/en',
+  delete: dict.saved.delete,
+  deleteConfirm: dict.saved.deleteConfirm,
+  relMoment: dict.saved.relMoment,
+  cityCountTpl: locale === 'es' ? '· {n} ciudades' : '· {n} cities',
+  updatedTpl: locale === 'es' ? 'Actualizada {rel}' : 'Updated {rel}',
+  relMinTpl: locale === 'es' ? 'hace {n} min' : '{n} min ago',
+  relHrTpl: locale === 'es' ? 'hace {n} h' : '{n} h ago',
+  relDayTpl: locale === 'es' ? 'hace {n} d' : '{n} d ago',
+};
+---
+
+<Layout
+  title={dict.meta.savedTitle}
+  description={dict.meta.savedDescription}
+  canonicalPath={locale === 'es' ? '/mis-comparaciones' : '/en/saved'}
+>
+  <section class="mx-auto max-w-4xl px-6 pt-10 pb-16">
+    <div class="flex items-end justify-between">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{dict.saved.h1}</h1>
+        <p class="mt-2 text-slate-500 dark:text-slate-400">{dict.saved.subtitle}</p>
+      </div>
+      <a
+        href={locale === 'es' ? '/' : '/en'}
+        class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400"
+      >
+        {dict.saved.new}
+      </a>
+    </div>
+
+    <div id="empty" class="mt-10 hidden rounded-xl border border-dashed border-slate-300 p-12 text-center dark:border-slate-700">
+      <p class="text-slate-500 dark:text-slate-400">{dict.saved.emptyTitle}</p>
+      <a
+        href={locale === 'es' ? '/' : '/en'}
+        class="mt-4 inline-block text-emerald-600 underline hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+      >
+        {dict.saved.emptyCta}
+      </a>
+    </div>
+
+    <ul id="list" class="mt-8 grid gap-3"></ul>
+  </section>
+</Layout>
+
+<script is:inline define:vars={{ citiesPayload, i18nPayload }}>
+  window.__CITIES__ = citiesPayload;
+  window.__I18N__ = i18nPayload;
+</script>
+<script>
+  import '../scripts/saved-list';
+</script>
