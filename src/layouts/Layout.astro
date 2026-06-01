@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Analytics from '@vercel/analytics/astro';
 import { getLocaleFromPath, localizePath, t, type Locale } from '../i18n';
 
 interface Props {
@@ -130,5 +131,7 @@ const enHref = `${siteUrl}${locale === 'en' ? path : altPath}`;
     <script>
       import '../scripts/theme-toggle';
     </script>
+
+    <Analytics />
   </body>
 </html>
