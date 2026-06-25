@@ -30,10 +30,9 @@ export const es = {
   support: {
     cafecitoLabel: "Invitame un café en cafecito.app",
     cafecitoUrl: "https://cafecito.app/manubolla",
-    assist365Eyebrow: "Antes de tu próximo viaje",
-    assist365Title: "Asegurá tu viaje con Assist 365",
-    assist365Subtitle:
-      "Asistencia al viajero en más de 100 países. Cotizá tu cobertura en minutos.",
+    assist365Eyebrow: "¿Te sirvió esta web?",
+    assist365Title: "Contribuí con nosotros sacando tu seguro de viaje con 5% de descuento",
+    assist365Subtitle: "Asistencia y seguro de viaje de Assist 365.",
     assist365Cta: "Ver coberturas",
     assist365Url: "https://c4ub.short.gy/timeoverlap",
     assist365Disclosure: "Enlace de afiliado",

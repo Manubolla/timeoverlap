@@ -30,10 +30,9 @@ export const en: Widen<typeof es> = {
   support: {
     cafecitoLabel: "Buy me a coffee at cafecito.app",
     cafecitoUrl: "https://cafecito.app/manubolla",
-    assist365Eyebrow: "Before your next trip",
-    assist365Title: "Cover your trip with Assist 365",
-    assist365Subtitle:
-      "Travel assistance in 100+ countries. Get a quote in minutes.",
+    assist365Eyebrow: "Was this helpful?",
+    assist365Title: "Support us by getting your travel insurance with a 5% discount",
+    assist365Subtitle: "Travel insurance and assistance by Assist 365.",
     assist365Cta: "See coverage",
     assist365Url: "https://c4ub.short.gy/timeoverlap",
     assist365Disclosure: "Affiliate link",
