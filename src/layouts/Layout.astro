@@ -28,6 +28,17 @@ const enHref = `${siteUrl}${locale === 'en' ? path : altPath}`;
 <html lang={locale}>
   <head>
     <meta charset="UTF-8" />
+    {import.meta.env.PROD && (
+  <>
+    <script is:inline src="https://www.googletagmanager.com/gtag/js?id=G-8H1SXDVH1K"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8H1SXDVH1K');
+    </script>
+  </>
+)}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
