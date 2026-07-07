@@ -14,7 +14,7 @@ interface Props {
 const locale: Locale = getLocaleFromPath(Astro.url.pathname);
 const dict = t(locale);
 const { title, description, canonicalPath, alternatePath } = Astro.props;
-const siteUrl = 'https://timeoverlap.app';
+const siteUrl = 'https://timeoverlap.vercel.app';
 const path = canonicalPath ?? Astro.url.pathname;
 const canonical = `${siteUrl}${path}`;
 

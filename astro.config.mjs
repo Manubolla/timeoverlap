@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://timeoverlap.app',
+  site: 'https://timeoverlap.vercel.app',
   i18n: {
     defaultLocale: 'es',
     locales: ['es', 'en'],
